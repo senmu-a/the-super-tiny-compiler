@@ -76,16 +76,13 @@
  */
 
 /**
- * Today we're going to write a compiler together. But not just any compiler... A
- * super duper teeny tiny compiler! A compiler that is so small that if you
- * remove all the comments this file would only be ~200 lines of actual code.
+ * 今天我们来一起写一个编译器。一个超级小的编译器！小到如果你移除所有的注释会发现只有 200 多行代码。
  *
- * We're going to compile some lisp-like function calls into some C-like
- * function calls.
+ * 我们将把类似 LISP 的函数调用编译为类似 C 的函数调用
+ * 
+ * 如果你不熟悉其中之一，我将给你快速的介绍。
  *
- * If you are not familiar with one or the other. I'll just give you a quick intro.
- *
- * If we had two functions `add` and `subtract` they would be written like this:
+ * 如果我们有两个函数 `add` 和 `subtract` 它们会写成这样：
  *
  *                  LISP                      C
  *
@@ -93,55 +90,41 @@
  *   4 - 2          (subtract 4 2)            subtract(4, 2)
  *   2 + (4 - 2)    (add 2 (subtract 4 2))    add(2, subtract(4, 2))
  *
- * Easy peezy right?
+ * 很简单是吧？
  *
- * Well good, because this is exactly what we are going to compile. While this
- * is neither a complete LISP or C syntax, it will be enough of the syntax to
- * demonstrate many of the major pieces of a modern compiler.
+ * 很好，因为这正是我们要编译的。虽然这并不是完整的 LISP 或者 C 语法，但它足以展示现代编译器的许多主要功能。
  */
 
 /**
- * Most compilers break down into three primary stages: Parsing, Transformation,
- * and Code Generation
+ * 许多编译器分为三个主要阶段：解析、转换和生成代码(Parsing、Transformation、Code Generation)
  *
- * 1. *Parsing* is taking raw code and turning it into a more abstract
- *    representation of the code.
+ * 1. *解析(Parsing)* 会获取源代码并将其转化为代码的更为抽象的表示。
  *
- * 2. *Transformation* takes this abstract representation and manipulates to do
- *    whatever the compiler wants it to.
+ * 2. *转换(Transformation)* 采用这种抽象的表示并进行操作以执行编译器希望它执行的操作。
  *
- * 3. *Code Generation* takes the transformed representation of the code and
- *    turns it into new code.
+ * 3. *代码生成(Code Generation)* 采用转换后的代码表示并转为新的代码
  */
 
 /**
  * Parsing
  * -------
  *
- * Parsing typically gets broken down into two phases: Lexical Analysis and
- * Syntactic Analysis.
+ * 解析通常分为两个阶段：词法分析和语法分析。
  *
- * 1. *Lexical Analysis* takes the raw code and splits it apart into these things
- *    called tokens by a thing called a tokenizer (or lexer).
+ * 1. *词法分析* 获取原始代码并通过称为标记器（或词法分析器）的东西将其拆分为标记(tokens)。
  *
- *    Tokens are an array of tiny little objects that describe an isolated piece
- *    of the syntax. They could be numbers, labels, punctuation, operators,
- *    whatever.
+ *    标记是一组微小的对象，描述了一个孤立的语法片段。它们可以是数字、标签、标点符号、运算符等等。
  *
- * 2. *Syntactic Analysis* takes the tokens and reformats them into a
- *    representation that describes each part of the syntax and their relation
- *    to one another. This is known as an intermediate representation or
- *    Abstract Syntax Tree.
+ * 2. *语法分析* 采用标记并将它们重新格式化为描述语法每个部分及其相互关系的一种表示。
+ *    这个被称为中间表示或者抽象语法树
  *
- *    An Abstract Syntax Tree, or AST for short, is a deeply nested object that
- *    represents code in a way that is both easy to work with and tells us a lot
- *    of information.
+ *    抽象语法树简称 AST ，是一个深度嵌套的对象，它以一种既易于使用又能告诉我们大量信息的方式来表示代码。
  *
- * For the following syntax:
+ * 对于下面的语法：
  *
  *   (add 2 (subtract 4 2))
  *
- * Tokens might look something like this:
+ * 标记可能看起来像这样：
  *
  *   [
  *     { type: 'paren',  value: '('        },
@@ -155,7 +138,7 @@
  *     { type: 'paren',  value: ')'        },
  *   ]
  *
- * And an Abstract Syntax Tree (AST) might look like this:
+ * AST 可能看起来像这样：
  *
  *   {
  *     type: 'Program',
@@ -184,26 +167,23 @@
  * Transformation
  * --------------
  *
- * The next type of stage for a compiler is transformation. Again, this just
- * takes the AST from the last step and makes changes to it. It can manipulate
- * the AST in the same language or it can translate it into an entirely new
- * language.
+ * 编辑器的下一个阶段是转换。这只是从最后一步获取 AST 并对其进行更改。它可以操作同一种语言的 AST
+ * 或者它可以将其翻译成全新的语言。
  *
- * Let’s look at how we would transform an AST.
+ * 让我们来看看我们将如何转换 AST。
  *
- * You might notice that our AST has elements within it that look very similar.
- * There are these objects with a type property. Each of these are known as an
- * AST Node. These nodes have defined properties on them that describe one
- * isolated part of the tree.
+ * 你可能会注意到我们 AST 中的元素看起来非常相似。这些对象具有 type 属性。这些中的每一个被称为 AST 节点。
+ * 这些节点在它们上定义了描述树的一个孤立部分的属性。
+ * 
  *
- * We can have a node for a "NumberLiteral":
+ * 我们可以有一个 "NumberLiteral" 节点：
  *
  *   {
  *     type: 'NumberLiteral',
  *     value: '2',
  *   }
  *
- * Or maybe a node for a "CallExpression":
+ * 或者可能有一个 "CallExpression" 节点：
  *
  *   {
  *     type: 'CallExpression',
@@ -211,20 +191,15 @@
  *     params: [...nested nodes go here...],
  *   }
  *
- * When transforming the AST we can manipulate nodes by
- * adding/removing/replacing properties, we can add new nodes, remove nodes, or
- * we could leave the existing AST alone and create an entirely new one based
- * on it.
+ * 在转换 AST 时，我们可以通过添加/删除/替换属性来操作节点，
+ * 我们可以添加节点、删除节点，或者我们可以不理会现有的 AST，并基于它创建一个全新的 AST。
  *
- * Since we’re targeting a new language, we’re going to focus on creating an
- * entirely new AST that is specific to the target language.
+ * 由于我们的目标是一种新语言，因此我们将专注于创建一个特定于目标语言的全新 AST。
  *
  * Traversal
  * ---------
  *
- * In order to navigate through all of these nodes, we need to be able to
- * traverse through them. This traversal process goes to each node in the AST
- * depth-first.
+ * 为了浏览所有这些节点，我们需要能够遍历它们。这个遍历过程采用深度优先的方法访问 AST 中的每个节点。
  *
  *   {
  *     type: 'Program',
@@ -248,46 +223,40 @@
  *     }]
  *   }
  *
- * So for the above AST we would go:
+ * 所以对于上面的 AST 我们会这样做：
  *
- *   1. Program - Starting at the top level of the AST
- *   2. CallExpression (add) - Moving to the first element of the Program's body
- *   3. NumberLiteral (2) - Moving to the first element of CallExpression's params
- *   4. CallExpression (subtract) - Moving to the second element of CallExpression's params
- *   5. NumberLiteral (4) - Moving to the first element of CallExpression's params
- *   6. NumberLiteral (2) - Moving to the second element of CallExpression's params
+ *   1. Program - 从 AST 的顶部开始
+ *   2. CallExpression (add) - 移动到 Program body 的第一个元素
+ *   3. NumberLiteral (2) - 移动到 CallExpression(add) params 的第一个元素
+ *   4. CallExpression (subtract) = 移动到 CallExpression params 的第二个元素
+ *   5. NumberLiteral (4) - 移动到 CallExpression(subtract) params 的第一个元素
+ *   6. NumberLiteral (2) - 移动到 CallExpression(subtract) params 的第二个元素
  *
- * If we were manipulating this AST directly, instead of creating a separate AST,
- * we would likely introduce all sorts of abstractions here. But just visiting
- * each node in the tree is enough for what we're trying to do.
+ * 如果我们直接操作这个 AST，而不是创建一个单独的 AST，我们可能会在这里引入各种抽象概念。
+ * 但是仅仅访问树中的每个节点就足以完成我们正在尝试做的事情。
  *
- * The reason I use the word "visiting" is because there is this pattern of how
- * to represent operations on elements of an object structure.
+ * 我使用“访问”这个词的原因是因为存在这种如何表示对对象结构元素的操作的模式。
  *
  * Visitors
  * --------
  *
- * The basic idea here is that we are going to create a “visitor” object that
- * has methods that will accept different node types.
+ * 这里的基本思想是，我们将创建一个“访问者”对象，该对象具有接受不同节点类型的方法。
  *
  *   var visitor = {
  *     NumberLiteral() {},
  *     CallExpression() {},
  *   };
  *
- * When we traverse our AST, we will call the methods on this visitor whenever we
- * "enter" a node of a matching type.
+ * 当我们遍历我们的 AST 时，只要我们“进入”一个匹配 type 的节点，我们就会调用这个访问者的方法。
  *
- * In order to make this useful we will also pass the node and a reference to
- * the parent node.
+ * 为了使它有用，我们还将传递节点和对父节点的引用。
  *
  *   var visitor = {
  *     NumberLiteral(node, parent) {},
  *     CallExpression(node, parent) {},
  *   };
  *
- * However, there also exists the possibility of calling things on "exit". Imagine
- * our tree structure from before in list form:
+ * 但是，也存在调用“退出”的可能性。想象一下我们之前列表形式的树结构：
  *
  *   - Program
  *     - CallExpression
@@ -296,9 +265,8 @@
  *         - NumberLiteral
  *         - NumberLiteral
  *
- * As we traverse down, we're going to reach branches with dead ends. As we
- * finish each branch of the tree we "exit" it. So going down the tree we
- * "enter" each node, and going back up we "exit".
+ * 当我们向下遍历时，我们将到达有死胡同的分支。
+ * 当我们完成树的每个分支时，我们“退出”它。顺着树往下走，我们“进入”每个节点，往上走，我们“退出”。
  *
  *   -> Program (enter)
  *     -> CallExpression (enter)
@@ -313,7 +281,7 @@
  *     <- CallExpression (exit)
  *   <- Program (exit)
  *
- * In order to support that, the final form of our visitor will look like this:
+ * 为了支持上面的方式，最终的访问者对象的形式看起来像这样：
  *
  *   var visitor = {
  *     NumberLiteral: {
@@ -327,36 +295,30 @@
  * Code Generation
  * ---------------
  *
- * The final phase of a compiler is code generation. Sometimes compilers will do
- * things that overlap with transformation, but for the most part code
- * generation just means take our AST and string-ify code back out.
+ * 最终的阶段是代码生成。有时编译器会做一些与转换重叠的事情，但在大多数情况下，
+ * 代码生成只是意味着将我们的 AST 和字符串代码取出。
  *
- * Code generators work several different ways, some compilers will reuse the
- * tokens from earlier, others will have created a separate representation of
- * the code so that they can print nodes linearly, but from what I can tell most
- * will use the same AST we just created, which is what we’re going to focus on.
+ * 代码生成器有几种不同的工作方式，一些编译器将重用之前的标记，
+ * 其他编译器将创建代码的单独表示，以便它们可以线性打印节点，
+ * 但据我所知，大多数编译器将使用我们刚刚创建的相同 AST，这就是我们要关注的。
  *
- * Effectively our code generator will know how to “print” all of the different
- * node types of the AST, and it will recursively call itself to print nested
- * nodes until everything is printed into one long string of code.
+ * 实际上，我们的代码生成器将知道如何“打印” AST 的所有不同节点类型，
+ * 并且它将递归调用自身来打印嵌套节点，直到所有内容都打印成一长串代码。
  */
 
 /**
- * And that's it! That's all the different pieces of a compiler.
+ * 就是这样！这就是编译器的所有不同的部分。
  *
- * Now that isn’t to say every compiler looks exactly like I described here.
- * Compilers serve many different purposes, and they might need more steps than
- * I have detailed.
+ * 并不是说每个编译器看起来都和我在这里描述的完全一样。
+ * 编译器有许多不同的用途，它们可能需要比我描述的还要多很多的步骤。
  *
- * But now you should have a general high-level idea of what most compilers look
- * like.
+ * 但是现在你应该对大多数编译器的样子有一个大致的了解。
  *
- * Now that I’ve explained all of this, you’re all good to go write your own
- * compilers right?
+ * 我已经全部解释了，你们都可以编写自己的编译器了，对吧？
  *
- * Just kidding, that's what I'm here to help with :P
+ * 只是开个玩笑，我就是来帮忙的 :P
  *
- * So let's begin...
+ * 那么我们开始吧
  */
 
 /**
@@ -381,6 +343,7 @@
 function tokenizer(input) {
 
   // A `current` variable for tracking our position in the code like a cursor.
+  // 用于像光标一样跟踪我们在代码中的位置。
   let current = 0;
 
   // And a `tokens` array for pushing our tokens to.
